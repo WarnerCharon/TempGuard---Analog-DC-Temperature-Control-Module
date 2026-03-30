@@ -25,7 +25,6 @@ TempGuard 是一款專為工控系統設計的純類比直流溫控輔助模組 
 | **Relay Type (繼電器接點)** | SPDT (NO / NC / COM)  |
 
 ## 🔌 Wiring & Applications (接線與應用)
-*(Note: Please insert your diagram images here / 請在此處插入您的接線圖)*
 * **Cooling Mode (高溫散熱):** Connect to `COM` + `NO`. Relay conducts when Temp > Setpoint.
 * **Heating/Protection Mode (低溫加熱/高溫保護):** Connect to `COM` + `NC`. Relay disconnects when Temp > Setpoint.
 
