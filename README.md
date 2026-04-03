@@ -12,7 +12,7 @@ TempGuard 是一款專為工控系統設計的純類比直流溫控輔助模組 
 ## 🛡️ Hardware Advantages & Safety (硬體優勢與安全性)
 * **No Software Overhead (零軟體負擔):** Pure analog circuit on FR4 PCB. No coding or debugging required.
 * **Flame Retardant (最高阻燃標準):** The enclosure is made of UL94 V-0 flame-retardant ABS/PC.
-* **Environmental Protection (環境防護):** IP54 rating (when the case is closed), providing reliable protection against dust ingress and water splashes.
+* **Environmental Protection (環境防護):** when the case is closed, providing reliable protection against dust ingress and water splashes.
 * **Derating Design (主動降額設計):** Utilizes a 10A Songle relay, actively derated to a 2.5A continuous load to maximize mechanical lifespan (>50,000 cycles).
 * **Smart Hysteresis (智慧回差):** Built-in 5.2~8.0°C hysteresis to prevent frequent relay toggling near the target temperature.
 
