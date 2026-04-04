@@ -3,6 +3,7 @@
 
 [![Hardware License](https://img.shields.io/badge/Hardware%20License-CERN--OHL--S%20v2.0-blue.svg)](LICENSE-HARDWARE.txt)
 [![Doc License](https://img.shields.io/badge/Doc%20License-CC%20BY--SA%204.0-green.svg)](LICENSE-DOCS.txt)
+[![OSHWA Certified](https://img.shields.io/badge/OSHWA-TW000009-orange?logo=opensourcehardware&logoColor=white)](https://certification.oshwa.org/tw000009.html)
 
 ## 📌 Project Overview (專案簡介)
 TempGuard is an industrial-grade, pure analog DC temperature control module designed for auxiliary temperature regulation. It operates entirely without microcontrollers (MCU) or firmware, ensuring zero risk of system crashes and high resistance to electromagnetic interference. 
