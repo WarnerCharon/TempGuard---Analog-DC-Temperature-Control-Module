@@ -20,7 +20,7 @@ TempGuard 是一款專為工控系統設計的純類比直流溫控輔助模組 
 ## ⚙️ Core Specifications (技術規格)
 | Specification (項目) | Details (規格) |
 | :--- | :--- |
-| **Control Range (控溫範圍)** | 10~69°C (Adjustable via potentiometer)  |
+| **Control Range (控溫範圍)** | 1~65°C (Adjustable via potentiometer)  |
 | **Power Input (輸入電源)** | 12V DC Only (Strictly NO AC)  |
 | **Output (輸出規格)** | 0~30V DC / Continuous 2.5A Max  |
 | **Relay Type (繼電器接點)** | SPDT (NO / NC / COM)  |
