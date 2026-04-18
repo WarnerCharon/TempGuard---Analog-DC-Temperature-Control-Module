@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TempGuard v3 — 三代溫控技術的選擇哲學</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700;900&family=Noto+Sans+TC:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --bg:       #f7f4ef;
+  --bg2:      #ede8df;
+  --white:    #ffffff;
+  --ink:      #1c1612;
+  --ink2:     #3d3028;
+  --muted:    #8a7d6e;
+  --border:   #d9cfc0;
+
+  --amber:    #c47d0e;
+  --amber-l:  #fdf0d6;
+  --amber-d:  #7a4d06;
+
+  --teal:     #177060;
+  --teal-l:   #d6f0eb;
+  --teal-d:   #0d4a3e;
+
+  --slate:    #3a5a8a;
+  --slate-l:  #dce8f7;
+  --slate-d:  #1e3555;
+
+  --red:      #a83232;
+  --red-l:    #fae8e8;
+
+  --shadow-s: 0 2px 8px rgba(28,22,18,0.07);
+  --shadow-m: 0 6px 24px rgba(28,22,18,0.10);
+  --shadow-l: 0 16px 48px rgba(28,22,18,0.13);
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; font-size:16px; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Noto Sans TC', sans-serif;
+  line-height: 1.75;
+}
+
+/* ── NAV ── */
+.nav {
+  position: sticky; top:0; z-index:200;
+  background: rgba(247,244,239,0.93);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px;
+}
+.nav-logo {
+  font-family:'Noto Serif TC',serif;
+  font-weight:900; font-size:20px;
+  color: var(--amber); letter-spacing:-0.03em;
+}
+.nav-links { display:flex; gap:24px; }
+.nav-links a {
+  font-size:12px; font-weight:600; color:var(--muted);
+  text-decoration:none; letter-spacing:0.05em;
+  transition:color 0.2s;
+}
+.nav-links a:hover { color:var(--amber); }
+.nav-btn {
+  background:var(--amber); color:#fff;
+  padding:8px 20px; border-radius:6px;
+  font-size:13px; font-weight:700;
+  text-decoration:none; font-family:'Noto Sans TC',sans-serif;
+  transition:background 0.2s;
+}
+.nav-btn:hover { background:var(--amber-d); }
+
+/* ── HERO ── */
+.hero {
+  min-height: 92vh;
+  background:
+    radial-gradient(ellipse 80% 60% at 60% 10%, rgba(196,125,14,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 10% 80%, rgba(23,112,96,0.08) 0%, transparent 60%),
+    linear-gradient(170deg, #1a1410 0%, #251e14 50%, #14201a 100%);
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding: 100px 28px 80px;
+  text-align:center;
+  position:relative; overflow:hidden;
+}
+
+/* animated grid lines */
+.hero::before {
+  content:'';
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(rgba(196,125,14,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(196,125,14,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridDrift 20s linear infinite;
+}
+@keyframes gridDrift { from{background-position:0 0} to{background-position:60px 60px} }
+
+.hero-kicker {
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px; letter-spacing:0.18em; text-transform:uppercase;
+  color:var(--amber);
+  background:rgba(196,125,14,0.12);
+  border:1px solid rgba(196,125,14,0.25);
+  padding:5px 16px; border-radius:99px;
+  margin-bottom:28px; position:relative;
+  animation: riseIn 0.7s ease both;
+}
+.hero-kicker::before { content:'◆'; font-size:8px; }
+
+.hero h1 {
+  font-family:'Noto Serif TC',serif;
+  font-size:clamp(34px,6vw,68px);
+  font-weight:900; color:#fff;
+  line-height:1.2; margin-bottom:22px;
+  position:relative;
+  animation: riseIn 0.7s 0.1s ease both;
+}
+.hero h1 .hl { color:var(--amber); }
+.hero h1 .hl2 { color:#6de8c8; }
+
+.hero-desc {
+  font-size:clamp(15px,2vw,18px);
+  color:rgba(255,255,255,0.58);
+  max-width:540px; margin:0 auto 40px;
+  position:relative;
+  animation: riseIn 0.7s 0.2s ease both;
+}
+
+/* three-column era strip */
+.era-strip {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:2px; max-width:680px; width:100%;
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:14px; overflow:hidden;
+  margin-bottom:44px; position:relative;
+  animation: riseIn 0.7s 0.3s ease both;
+}
+.era-col {
+  padding:22px 18px;
+  display:flex; flex-direction:column; align-items:center;
+  gap:8px; text-align:center;
+}
+.era-mech  { background:rgba(58,90,138,0.18); }
+.era-digit { background:rgba(88,160,255,0.10); }
+.era-tg    { background:rgba(196,125,14,0.18); border:1px solid rgba(196,125,14,0.3); }
+.era-icon  { font-size:28px; }
+.era-name  { font-size:13px; font-weight:700; }
+.era-mech  .era-name { color:#8ab4f8; }
+.era-digit .era-name { color:#60c8ff; }
+.era-tg    .era-name { color:var(--amber); }
+.era-tag   {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px; padding:2px 8px;
+  border-radius:99px; font-weight:600;
+}
+.era-mech  .era-tag { background:rgba(58,90,138,0.3); color:#8ab4f8; }
+.era-digit .era-tag { background:rgba(88,160,255,0.2); color:#60c8ff; }
+.era-tg    .era-tag { background:rgba(196,125,14,0.3); color:var(--amber); }
+
+.hero-cta-row {
+  display:flex; gap:12px; flex-wrap:wrap; justify-content:center;
+  position:relative; animation: riseIn 0.7s 0.4s ease both;
+}
+.hbtn-primary {
+  background:var(--amber); color:#fff;
+  padding:14px 36px; border-radius:8px;
+  font-size:15px; font-weight:700;
+  text-decoration:none; border:none; cursor:pointer;
+  font-family:'Noto Sans TC',sans-serif;
+  transition:background 0.2s, transform 0.15s;
+  box-shadow: 0 4px 16px rgba(196,125,14,0.35);
+}
+.hbtn-primary:hover { background:var(--amber-d); transform:translateY(-2px); }
+.hbtn-ghost {
+  background:transparent; color:rgba(255,255,255,0.7);
+  padding:14px 28px; border-radius:8px;
+  font-size:15px; font-weight:600;
+  text-decoration:none;
+  border:1px solid rgba(255,255,255,0.2);
+  font-family:'Noto Sans TC',sans-serif;
+  transition:border-color 0.2s, color 0.2s;
+}
+.hbtn-ghost:hover { border-color:var(--amber); color:var(--amber); }
+
+@keyframes riseIn {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── TRUST BAR ── */
+.trust-bar {
+  background: var(--white);
+  border-bottom:1px solid var(--border);
+  padding:14px 28px;
+  display:flex; gap:0; justify-content:center;
+  overflow-x:auto;
+}
+.trust-item {
+  display:flex; align-items:center; gap:7px;
+  padding:0 22px; white-space:nowrap;
+  font-size:12px; font-weight:600; color:var(--amber-d);
+  border-right:1px solid var(--border);
+}
+.trust-item:last-child { border-right:none; }
+.trust-item .ti { font-size:16px; }
+
+/* ── WRAP ── */
+.wrap { max-width:860px; margin:0 auto; padding:0 28px; }
+
+/* ── SECTION HEADERS ── */
+.sec { padding:72px 0; border-bottom:1px solid var(--border); }
+.sec:last-child { border-bottom:none; }
+.sec-eyebrow {
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px; letter-spacing:0.18em; text-transform:uppercase;
+  color:var(--amber); background:var(--amber-l);
+  padding:4px 12px; border-radius:4px;
+  margin-bottom:16px; font-weight:600;
+}
+.sec-h2 {
+  font-family:'Noto Serif TC',serif;
+  font-size:clamp(24px,4vw,36px);
+  font-weight:900; color:var(--ink);
+  line-height:1.25; margin-bottom:12px;
+}
+.sec-h2 em { color:var(--amber); font-style:normal; }
+.sec-h2 .tl { color:var(--teal); }
+.sec-h2 .sl { color:var(--slate); }
+.sec-lead {
+  font-size:15px; color:var(--muted);
+  max-width:580px; margin-bottom:36px; line-height:1.8;
+}
+
+/* ── PHILOSOPHY ── */
+.phil-grid {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:1px; background:var(--border);
+  border:1px solid var(--border); border-radius:14px; overflow:hidden;
+  box-shadow:var(--shadow-m);
+}
+.phil-card {
+  background:var(--white);
+  padding:28px 24px;
+  transition:background 0.2s;
+}
+.phil-card:hover { background:#fffdf8; }
+.phil-no {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px; color:var(--amber);
+  font-weight:600; margin-bottom:10px;
+  letter-spacing:0.1em;
+}
+.phil-title { font-size:16px; font-weight:700; color:var(--ink); margin-bottom:8px; }
+.phil-body  { font-size:13px; color:var(--muted); line-height:1.8; }
+.phil-quote {
+  margin-top:12px; padding:10px 14px;
+  background:var(--amber-l); border-left:3px solid var(--amber);
+  border-radius:0 6px 6px 0;
+  font-size:12px; color:var(--amber-d);
+  font-style:italic; line-height:1.7;
+}
+
+/* ── THREE-WAY COMPARE TABLE ── */
+.cmp-note {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:10px; padding:16px 20px;
+  font-size:13px; color:var(--muted); line-height:1.8;
+  margin-bottom:24px;
+}
+.cmp-note strong { color:var(--ink); }
+
+.cmp-wrap { overflow-x:auto; border-radius:14px; box-shadow:var(--shadow-m); }
+.cmp-table {
+  width:100%; border-collapse:collapse;
+  min-width:620px;
+}
+.cmp-table thead tr th {
+  padding:16px 18px; font-size:13px; font-weight:700;
+  text-align:center; border-bottom:2px solid var(--border);
+}
+.cmp-table thead th:nth-child(1) {
+  background:var(--bg2); color:var(--muted);
+  text-align:left; font-size:12px; width:22%;
+}
+.cmp-table thead th:nth-child(2) {
+  background:#eef2fb; color:var(--slate-d);
+  width:26%;
+}
+.cmp-table thead th:nth-child(3) {
+  background:#eef4fc; color:#2050a0;
+  width:26%;
+}
+.cmp-table thead th:nth-child(4) {
+  background:var(--amber-l); color:var(--amber-d);
+  width:26%;
+}
+.th-icon { font-size:22px; display:block; margin-bottom:4px; }
+.th-name { display:block; font-size:13px; font-weight:700; }
+.th-sub  { display:block; font-size:10px; font-weight:400; opacity:0.7; margin-top:2px; font-family:'IBM Plex Mono',monospace; }
+
+.cmp-table tbody tr:nth-child(even) td { background:#faf8f5; }
+.cmp-table tbody tr:nth-child(odd)  td { background:#fff; }
+.cmp-table tbody td {
+  padding:13px 18px; font-size:13px;
+  border-bottom:1px solid var(--border);
+  vertical-align:top; line-height:1.65;
+}
+.cmp-table tbody td:nth-child(1) {
+  background:var(--bg2) !important;
+  font-weight:700; font-size:12px;
+  color:var(--muted); letter-spacing:0.02em;
+}
+.cmp-table tbody td:nth-child(2) { background:#f7f9fe !important; }
+.cmp-table tbody td:nth-child(3) { background:#f6faff !important; }
+.cmp-table tbody td:nth-child(4) { background:#fffcf5 !important; }
+.cmp-table tbody tr:last-child td { border-bottom:none; }
+
+.chip {
+  display:inline-block; font-size:11px; font-weight:700;
+  padding:2px 9px; border-radius:99px; white-space:nowrap;
+}
+.chip-g  { background:var(--teal-l);  color:var(--teal-d); }
+.chip-a  { background:var(--amber-l); color:var(--amber-d); }
+.chip-s  { background:var(--slate-l); color:var(--slate-d); }
+.chip-n  { background:#eee; color:#666; }
+.chip-r  { background:var(--red-l); color:var(--red); }
+
+.cmp-summary {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:12px; margin-top:20px;
+}
+.cmp-sum-card {
+  border-radius:10px; padding:18px 20px;
+  border:1px solid var(--border);
+}
+.cmp-sum-mech  { background:#f0f4fc; border-color:#c0d0f0; }
+.cmp-sum-digit { background:#f0f5ff; border-color:#b0c8f0; }
+.cmp-sum-tg    { background:var(--amber-l); border-color:var(--amber); }
+.csl-title { font-size:13px; font-weight:700; margin-bottom:8px; }
+.cmp-sum-mech  .csl-title { color:var(--slate-d); }
+.cmp-sum-digit .csl-title { color:#2050a0; }
+.cmp-sum-tg    .csl-title { color:var(--amber-d); }
+.csl-body { font-size:12px; color:var(--muted); line-height:1.7; }
+
+/* ── SCENARIO ── */
+.scenario-tabs { display:flex; gap:0; margin-bottom:-1px; }
+.stab {
+  padding:10px 22px; font-size:13px; font-weight:700;
+  border:1px solid var(--border); border-bottom:none;
+  border-radius:8px 8px 0 0; cursor:pointer;
+  background:var(--bg2); color:var(--muted);
+  transition:all 0.15s;
+}
+.stab.active-mech  { background:#f0f4fc; color:var(--slate-d); border-color:#c0d0f0; }
+.stab.active-tg    { background:var(--amber-l); color:var(--amber-d); border-color:var(--amber); }
+.stab.active-digit { background:#f0f5ff; color:#2050a0; border-color:#b0c8f0; }
+
+.sbox {
+  border:1px solid var(--border);
+  border-radius:0 12px 12px 12px;
+  background:var(--white); overflow:hidden;
+  box-shadow:var(--shadow-s);
+}
+.scene-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:0; }
+.scene-card {
+  padding:24px 22px;
+  border-right:1px solid var(--border);
+}
+.scene-card:last-child { border-right:none; }
+.scene-icon   { font-size:26px; margin-bottom:10px; }
+.scene-mode   { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.12em; text-transform:uppercase; font-weight:600; margin-bottom:6px; }
+.scene-mech   .scene-mode { color:var(--slate); }
+.scene-tg     .scene-mode { color:var(--amber); }
+.scene-title  { font-size:14px; font-weight:700; color:var(--ink); margin-bottom:8px; }
+.scene-body   { font-size:12px; color:var(--muted); line-height:1.7; }
+.scene-result { font-size:12px; font-weight:700; padding:4px 10px; border-radius:99px; display:inline-block; margin-top:10px; }
+.scene-tg .scene-result     { background:var(--amber-l); color:var(--amber-d); }
+.scene-mech .scene-result   { background:var(--slate-l); color:var(--slate-d); }
+
+/* ── TECH SPECS ── */
+.specs-2col {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:1px; background:var(--border);
+  border:1px solid var(--border); border-radius:14px; overflow:hidden;
+  box-shadow:var(--shadow-s);
+}
+.sr {
+  display:flex; gap:0;
+  background:var(--white);
+}
+.sk { width:140px; flex-shrink:0; background:var(--bg2); padding:11px 14px; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:0.03em; }
+.sv { flex:1; padding:11px 14px; font-size:13px; color:var(--ink); }
+.sv code {
+  font-family:'IBM Plex Mono',monospace; font-size:11px;
+  background:var(--amber-l); color:var(--amber-d);
+  padding:1px 6px; border-radius:3px;
+}
+.sv .good { color:var(--teal); font-weight:700; }
+.sv .warn { color:var(--red); font-weight:700; }
+
+/* ── SAFETY ── */
+.safety-grid {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:12px;
+}
+.scard {
+  padding:18px 20px; border-radius:10px;
+  border:1px solid var(--border);
+}
+.scard-r { background:var(--red-l);   border-color:#e0aaaa; }
+.scard-a { background:var(--amber-l); border-color:#e0c080; }
+.scard-g { background:var(--teal-l);  border-color:#80d0c0; }
+.si { font-size:20px; margin-bottom:6px; }
+.st { font-size:13px; font-weight:700; margin-bottom:4px; }
+.scard-r .st { color:var(--red); }
+.scard-a .st { color:var(--amber-d); }
+.scard-g .st { color:var(--teal-d); }
+.sb { font-size:12px; color:var(--muted); line-height:1.7; }
+
+/* ── INBOX ── */
+.inbox-list { list-style:none; }
+.inbox-li {
+  display:flex; gap:16px; align-items:flex-start;
+  padding:14px 0; border-bottom:1px solid var(--border);
+}
+.inbox-li:last-child { border-bottom:none; }
+.inbox-num {
+  flex-shrink:0; width:28px; height:28px;
+  background:var(--amber); color:#fff;
+  border-radius:50%; font-size:12px; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+  margin-top:2px;
+}
+.inbox-name { font-size:14px; font-weight:700; color:var(--ink); margin-bottom:3px; }
+.inbox-note { font-size:12px; color:var(--muted); }
+
+.warr-row {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:12px; margin-top:28px;
+}
+.wcard {
+  text-align:center; padding:20px 16px;
+  background:var(--white); border:1px solid var(--border);
+  border-radius:12px; box-shadow:var(--shadow-s);
+}
+.wcard-r { border-color:#e0aaaa; background:var(--red-l); }
+.wcard-icon { font-size:26px; margin-bottom:8px; }
+.wcard-title { font-size:13px; font-weight:700; color:var(--ink); margin-bottom:4px; }
+.wcard-desc  { font-size:11px; color:var(--muted); }
+.wcard-r .wcard-title { color:var(--red); }
+
+/* ── COPY BLOCKS ── */
+.copy-block { margin-bottom:20px; border-radius:12px; overflow:hidden; box-shadow:var(--shadow-s); }
+.copy-hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 20px;
+}
+.copy-hdr-shopee { background:linear-gradient(135deg,#e85d04,#f48c06); }
+.copy-hdr-line   { background:#06c755; }
+.copy-hdr-short  { background:#2d2d2d; }
+.copy-platform { color:#fff; font-size:14px; font-weight:700; }
+.copy-tip      { color:rgba(255,255,255,0.65); font-size:11px; font-family:'IBM Plex Mono',monospace; }
+.copy-body {
+  background:var(--bg2);
+  border:1px solid var(--border); border-top:none;
+  padding:24px 24px;
+  font-size:13px; line-height:2.0;
+  white-space:pre-wrap;
+  font-family:'Noto Sans TC',sans-serif;
+  color:var(--ink2);
+}
+
+/* ── FINAL CTA ── */
+.final-cta {
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(196,125,14,0.15) 0%, transparent 60%),
+    linear-gradient(160deg,#141008 0%,#1c1a10 50%,#101a14 100%);
+  padding:80px 28px;
+  text-align:center;
+}
+.final-cta h2 {
+  font-family:'Noto Serif TC',serif;
+  font-size:clamp(26px,5vw,44px);
+  font-weight:900; color:#fff;
+  margin-bottom:14px; line-height:1.3;
+}
+.final-cta h2 em { color:var(--amber); font-style:normal; }
+.final-cta .sub { font-size:15px; color:rgba(255,255,255,0.5); margin-bottom:36px; max-width:480px; margin-left:auto; margin-right:auto; }
+.cta-row { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom:28px; }
+.btn-shopee {
+  background:linear-gradient(135deg,#e85d04,#f48c06);
+  color:#fff; padding:14px 32px; border-radius:8px;
+  font-size:15px; font-weight:700; text-decoration:none;
+  font-family:'Noto Sans TC',sans-serif;
+  box-shadow:0 4px 16px rgba(232,93,4,0.35);
+  transition:transform 0.15s;
+}
+.btn-shopee:hover { transform:translateY(-2px); }
+.btn-line-cta {
+  background:#06c755; color:#fff;
+  padding:14px 32px; border-radius:8px;
+  font-size:15px; font-weight:700; text-decoration:none;
+  font-family:'Noto Sans TC',sans-serif;
+  transition:background 0.2s;
+}
+.btn-line-cta:hover { background:#059944; }
+.final-contact { font-size:11px; color:rgba(255,255,255,0.3); font-family:'IBM Plex Mono',monospace; margin-top:12px; }
+
+/* ── DIVIDER ── */
+.deco-div {
+  text-align:center; padding:32px 0;
+  color:var(--border); font-size:20px; letter-spacing:12px;
+}
+
+/* ── HIGHLIGHT CALLOUT ── */
+.callout {
+  border-radius:12px; padding:20px 24px;
+  margin:24px 0; font-size:14px; line-height:1.85;
+  display:flex; gap:14px;
+}
+.callout-amber { background:var(--amber-l); border-left:4px solid var(--amber); color:var(--amber-d); }
+.callout-teal  { background:var(--teal-l);  border-left:4px solid var(--teal);  color:var(--teal-d); }
+.callout-slate { background:var(--slate-l); border-left:4px solid var(--slate); color:var(--slate-d); }
+.callout-icon  { font-size:22px; flex-shrink:0; margin-top:2px; }
+
+/* responsive */
+@media(max-width:640px){
+  .nav-links { display:none; }
+  .era-strip { grid-template-columns:1fr; }
+  .specs-2col { grid-template-columns:1fr; }
+  .scene-grid { grid-template-columns:1fr; }
+  .cmp-table th:nth-child(2),
+  .cmp-table td:nth-child(2) { display:none; } /* hide mechanical on mobile */
+}
+
+
+.legal-inline strong { color: #a83232; }
+
+
+/* ── MEDIA ── */
+.media-sec { padding:60px 0; border-bottom:1px solid var(--border); }
+.media-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+  margin-bottom:28px;
+}
+@media(max-width:640px){ .media-grid{ grid-template-columns:1fr; } }
+
+.img-card {
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:var(--shadow-m);
+  transition:box-shadow 0.2s, transform 0.2s;
+}
+.img-card:hover { box-shadow:var(--shadow-l); transform:translateY(-2px); }
+.img-card img {
+  width:100%; display:block;
+  object-fit:contain;
+  background:var(--bg2);
+  max-height:340px;
+}
+.img-card-body { padding:14px 18px; }
+.img-card-title { font-size:14px; font-weight:700; color:var(--ink); margin-bottom:4px; }
+.img-card-desc  { font-size:12px; color:var(--muted); line-height:1.7; }
+
+.video-wrap {
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:var(--shadow-m);
+}
+.video-hdr {
+  background:linear-gradient(135deg,#c00,#e00);
+  padding:14px 20px;
+  display:flex; align-items:center; gap:10px;
+}
+.video-hdr-icon { font-size:20px; }
+.video-hdr-title { font-size:14px; font-weight:700; color:#fff; }
+.video-hdr-sub   { font-size:11px; color:rgba(255,255,255,0.7); margin-top:2px; font-family:'IBM Plex Mono',monospace; }
+.video-embed {
+  position:relative; padding-bottom:56.25%; height:0; overflow:hidden;
+}
+.video-embed iframe {
+  position:absolute; top:0; left:0;
+  width:100%; height:100%; border:none;
+}
+.video-note { padding:12px 18px; font-size:12px; color:var(--muted); line-height:1.7; }
+
+</style>
+</head>
+<body>
+
+
+<!-- ╔═ NAV ═╗ -->
+<nav class="nav">
+  <span class="nav-logo">TempGuard</span>
+  <div class="nav-links">
+    <a href="#philosophy">設計哲學</a>
+    <a href="#compare">三方比較</a>
+    <a href="#specs">規格</a>
+    <a href="TempGuard_文案版.html" target="_blank">📋 文案</a>
+  </div>
+  <a class="nav-btn" href="https://lin.ee/17faMX5" target="_blank">💬 LINE 購買</a>
+</nav>
+
+<!-- ╔═ HERO ═╗ -->
+<section class="hero">
+  <div class="hero-kicker">類比溫控技術 · 台灣設計製造</div>
+  <h1>
+    溫控，不只是<br>
+    <span class="hl">一個數字</span>，<br>
+    而是<span class="hl2">一種承諾</span>
+  </h1>
+  <p class="hero-desc">
+    從機械雙金屬片到數位 MCU，再到純類比電路——<br>
+    每一代技術都在回答同一個問題：<br>
+    「當設備需要保護時，你能信賴它嗎？」
+  </p>
+
+  <!-- Era comparison strip -->
+  <div class="era-strip">
+    <div class="era-col era-mech">
+      <div class="era-icon">🌡️</div>
+      <div class="era-name">傳統機械溫度計</div>
+      <div class="era-tag">1800s → 至今</div>
+    </div>
+    <div class="era-col era-digit">
+      <div class="era-icon">📟</div>
+      <div class="era-name">數位 MCU 溫控器</div>
+      <div class="era-tag">1980s → 主流</div>
+    </div>
+    <div class="era-col era-tg">
+      <div class="era-icon">⚡</div>
+      <div class="era-name">TempGuard 純類比</div>
+      <div class="era-tag">工控輔助 · 現在</div>
+    </div>
+  </div>
+
+  <div class="hero-cta-row">
+    <a class="hbtn-primary" href="#buy">🛒 蝦皮立即購買</a>
+    <a class="hbtn-primary" href="https://lin.ee/17faMX5" style="background:#06c755;box-shadow:0 4px 16px rgba(6,199,85,0.35);">💬 LINE 官方購買</a>
+    <a class="hbtn-ghost" href="#compare">了解三方比較 ↓</a>
+  </div>
+</section>
+
+
+<!-- MODULE IMAGE STRIP -->
+<div style="background:var(--bg2);border-bottom:1px solid var(--border);padding:32px 24px;text-align:center;">
+  <div style="max-width:680px;margin:0 auto;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--amber);margin-bottom:14px;font-weight:600;">◆ 商品外觀 · Module Diagram</div>
+    <div class="img-card" style="max-width:560px;margin:0 auto;">
+      <img src="https://raw.githubusercontent.com/WarnerCharon/TempGuard---Analog-DC-Temperature-Control-Module/refs/heads/main/Images/Module%20Diagram.png"
+           alt="TempGuard 純類比溫控模組 外觀圖"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <div style="display:none;padding:40px;color:var(--muted);font-size:13px;">圖片載入中，請稍候⋯</div>
+      <div class="img-card-body">
+        <div class="img-card-title">TempGuard 純類比直流溫控模組</div>
+        <div class="img-card-desc">UL94 V-0 阻燃外殼 · 40×28×23mm · 孔距 48mm · 含 NTC 氣體溫度探頭（線長 8cm）</div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- TRUST -->
+<div class="trust-bar">
+  <span class="trust-item"><span class="ti">🇹🇼</span>台灣設計製造</span>
+  <span class="trust-item"><span class="ti">🔥</span>UL94 V-0 阻燃</span>
+  <span class="trust-item"><span class="ti">⚡</span>純類比 · 無 MCU</span>
+  <span class="trust-item"><span class="ti">🔋</span>觸發電流 ≤ 40mA</span>
+  <span class="trust-item"><span class="ti">🔁</span>電氣壽命 ≥ 50,000 次</span>
+  <span class="trust-item"><span class="ti">🛡️</span>6 個月保固</span>
+</div>
+
+<div class="wrap">
+
+<!-- ╔═ DESIGN PHILOSOPHY ═╗ -->
+<div class="sec" id="philosophy">
+  <div class="sec-eyebrow">◆ 核心詮釋 · 01</div>
+  <h2 class="sec-h2">六個設計哲學，<em>說清楚為什麼</em></h2>
+  <p class="sec-lead">每一項設計決策背後，都有一個工控場景的真實需求在支撐。</p>
+
+  <div class="phil-grid">
+    <div class="phil-card">
+      <div class="phil-no">PHILOSOPHY · 01</div>
+      <div class="phil-title">「不依賴軟體的控制」</div>
+      <div class="phil-body">數位模組的韌體是軟體，軟體有 Bug、有崩潰、有需要更新的一天。TempGuard 的控制邏輯由類比電路元件直接實現——比較器、NTC 感測器、繼電器，沒有一行程式碼。</div>
+      <div class="phil-quote">上電即工作，斷電即停止。行為永遠如此，不多也不少。</div>
+    </div>
+    <div class="phil-card">
+      <div class="phil-no">PHILOSOPHY · 02</div>
+      <div class="phil-title">「可預期，比精確更重要」</div>
+      <div class="phil-body">TempGuard 的精度是 ±2.6~4°C，不如高階數位溫控的 ±0.5°C。但在工控保護情境中，「每次都如預期觸發」比「精確到小數點」更關鍵。差 3°C 能容忍；軟體異常導致保護失效一次，代價往往不可逆。</div>
+      <div class="phil-quote">精度是量測的語言。穩定是保護的語言。</div>
+    </div>
+    <div class="phil-card">
+      <div class="phil-no">PHILOSOPHY · 03</div>
+      <div class="phil-title">「回差，是保護繼電器的設計」</div>
+      <div class="phil-body">5.2~8°C 的遲滯設計，讓繼電器不會因為 1°C 的溫度波動就反覆切換。Songle SRD-12VDC-SL-C 機械壽命達 1,000 萬次；本品以電氣壽命保守估算，降額 2.5A 使用下設計壽命 ≥ 50,000 次——換算如下：3 年使用（每天 45 次）、2 年使用（每天 68 次）、1 年使用（每天 136 次），三種情境均在壽命範圍內。這是留有安全餘裕的誠實數字，不是行銷誇詞。</div>
+      <div class="phil-quote">每一次不必要的切換，都在縮短繼電器的壽命。回差設計，就是讓每一次切換都值得。</div>
+    </div>
+    <div class="phil-card">
+      <div class="phil-no">PHILOSOPHY · 04</div>
+      <div class="phil-title">「只賣含外殼的版本」</div>
+      <div class="phil-body">裸板便宜，但 UL94 V-0 阻燃外殼不是選配——它是火災防護的一部分。本品從不販售裸板版本，因為我們不希望省下的幾十元成為事故的代價。</div>
+      <div class="phil-quote">防火外殼是成本，也是責任。</div>
+    </div>
+    <div class="phil-card">
+      <div class="phil-no">PHILOSOPHY · 05</div>
+      <div class="phil-title">「說明書附刻度圖，三段溫度一目了然」</div>
+      <div class="phil-body">隨附說明書內含旋鈕角度對照圖，標示 1°C / 25°C / 41°C / 65°C 四個溫度刻度對照點。使用者對照圖示轉動旋鈕，即可完成基本設定，無需猜測，也無需外接螢幕或溫度計。接線方式詳見 <a href="https://drive.google.com/file/d/1I90y72y9HtPYs4UcWHQ4iX05-CS2VSnG/view?usp=sharing" target="_blank" style="color:var(--amber);font-weight:700;text-decoration:underline;">Wiring Diagram 接線圖 ↗</a>，圖示涵蓋三種主要應用接法。</div>
+      <div class="phil-quote">說明書就是最好的操作界面。翻開即懂，對照即設。</div>
+    </div>
+    <div class="phil-card">
+      <div class="phil-no">PHILOSOPHY · 06</div>
+      <div class="phil-title">「≤ 40mA 觸發，對電源幾乎無感」</div>
+      <div class="phil-body">TempGuard 的溫度感測與觸發電路整體工作電流在 40mA 以內。這意味著它可以並接於現有 DC 12V 電源而不影響主電路，不需要為溫控單獨拉一條電源，安裝更彈性。</div>
+      <div class="phil-quote">保護電路本身消耗越少，對系統的影響就越低。</div>
+    </div>
+    <div class="phil-card">
+      <div class="phil-no">PHILOSOPHY · 07</div>
+      <div class="phil-title">「輔助角色，不是全能防護」</div>
+      <div class="phil-body">TempGuard 從不宣稱自己是安全保護裝置的全部。它是工控系統中的一個輔助層——在主系統之外，多一層溫度觸發的硬體保護。清楚定位，才能正確使用。</div>
+      <div class="phil-quote">知道自己能做什麼，比誇大更誠實。</div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔═ THREE-WAY COMPARISON ═╗ -->
+<div class="sec" id="compare">
+  <div class="sec-eyebrow">◆ 核心詮釋 · 02</div>
+  <h2 class="sec-h2">三種溫控技術，<em>客觀並排說明</em></h2>
+  <p class="sec-lead">機械式、數位 MCU、純類比——三種技術路線各有其誕生背景與適用場景。以下比較基於設計特性的事實描述，不存在絕對優劣。</p>
+
+  <div class="cmp-note">
+    📌 <strong>閱讀提示：</strong>「傳統機械溫度計 / 溫控器」泛指雙金屬片溫度計、玻璃管溫度計、機械式溫控旋鈕等純機械元件，不含電子電路。「數位 MCU 溫控模組」泛指常見的 W1209、STC-1000 等帶 LED 顯示的電子溫控器。「TempGuard」為純類比電子電路設計，有別於上述兩類。
+  </div>
+
+  <div class="cmp-wrap">
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th>比較項目</th>
+        <th>
+          <span class="th-icon">🌡️</span>
+          <span class="th-name">傳統機械溫度計</span>
+          <span class="th-sub">雙金屬片 / 玻璃管</span>
+        </th>
+        <th>
+          <span class="th-icon">📟</span>
+          <span class="th-name">數位 MCU 溫控器</span>
+          <span class="th-sub">W1209 / STC-1000 類</span>
+        </th>
+        <th>
+          <span class="th-icon">⚡</span>
+          <span class="th-name">TempGuard 純類比</span>
+          <span class="th-sub">無 MCU · DC 12V</span>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>控制原理</td>
+        <td>雙金屬片熱膨脹差異形變，直接機械觸發接點；玻璃管為純顯示，無控制能力</td>
+        <td>NTC/熱電偶感測 → ADC 數位化 → MCU 運算 → 驅動繼電器</td>
+        <td>NTC 感測 → 類比比較器電路直接驅動繼電器；全程無數位轉換</td>
+      </tr>
+      <tr>
+        <td>是否需要電源</td>
+        <td><span class="chip chip-g">✅ 不需電源</span><br>純機械結構，自然現象驅動</td>
+        <td><span class="chip chip-r">⚡ 需要電源</span><br>AC 85~265V 或 DC 5~24V（依型號）</td>
+        <td><span class="chip chip-a">⚡ DC 12V</span><br>單電源，僅限直流，嚴禁 AC</td>
+      </tr>
+      <tr>
+        <td>精度</td>
+        <td>玻璃管：±0.5~1°C（讀取誤差另計）<br>雙金屬溫控旋鈕：±3~8°C</td>
+        <td><span class="chip chip-g">高精度</span> ±0.1~1°C（依型號與感測元件）</td>
+        <td>±2.6~4.0°C<br><span style="color:var(--muted);font-size:11px;">中溫區約 ±2.6°C，工控輔助用途</span></td>
+      </tr>
+      <tr>
+        <td>溫度顯示</td>
+        <td>玻璃管：刻度直讀<br>雙金屬旋鈕：無數值顯示，僅設定刻度</td>
+        <td><span class="chip chip-g">✅ LED 數字顯示</span><br>即時溫度 + 設定值清晰可讀</td>
+        <td><span class="chip chip-n">無顯示螢幕</span><br>說明書附旋鈕角度刻度對照圖（1°C / 25°C / 41°C / 65°C 四點溫度標示），使用者依圖示調整旋鈕即可完成設定</td>
+      </tr>
+      <tr>
+        <td>自動控制能力</td>
+        <td>雙金屬型：可自動切換接點（低精度）<br>玻璃管：<span class="chip chip-n">僅顯示，無法自動控制</span></td>
+        <td><span class="chip chip-g">✅ 完整自動控制</span><br>可設定上下限、回差、時延等參數</td>
+        <td><span class="chip chip-g">✅ 自動控制</span><br>旋鈕設定觸發點，電路自動執行</td>
+      </tr>
+      <tr>
+        <td>異常 / 故障風險</td>
+        <td><span class="chip chip-g">✅ 不依賴電子元件</span><br>長期使用可能彈簧疲勞、腐蝕</td>
+        <td>MCU 依賴電源穩定與韌體正常<br>電磁干擾可能造成異常重啟</td>
+        <td><span class="chip chip-g">✅ 無 MCU 無韌體</span><br>電路邏輯不受程式影響</td>
+      </tr>
+      <tr>
+        <td>抗電磁干擾</td>
+        <td><span class="chip chip-g">✅ 不受 EMI 影響</span><br>純機械結構無感</td>
+        <td>MCU 與數位電路對強 EMI 較敏感</td>
+        <td><span class="chip chip-g">✅ 類比電路耐受性較高</span><br>不依賴數位訊號處理</td>
+      </tr>
+      <tr>
+        <td>遠端通訊 / 整合</td>
+        <td><span class="chip chip-n">❌ 無法整合</span></td>
+        <td><span class="chip chip-g">✅ 部分支援</span><br>RS485 / Modbus / Wi-Fi（依型號）</td>
+        <td><span class="chip chip-n">❌ 不支援通訊</span><br>純本地硬體控制</td>
+      </tr>
+      <tr>
+        <td>接線複雜度</td>
+        <td>雙金屬型：接 2 線即可<br>玻璃管：僅讀溫，無需接線</td>
+        <td>需接電源線、感測線、負載線<br>AC 接線需注意安規</td>
+        <td><span class="chip chip-g">相對簡單</span><br>DC 12V 輸入 + SPDT 輸出</td>
+      </tr>
+      <tr>
+        <td>感測觸發電流</td>
+        <td>雙金屬型：純機械形變，<span class="chip chip-g">零電流</span><br>玻璃管：無電流（純顯示）</td>
+        <td>MCU 系統常態運行電流<br>通常 30~200mA（依型號）</td>
+        <td><span class="chip chip-g">≤ 40mA</span>（感測觸發電路）<br>極低功耗，對電源負擔極小</td>
+      </tr>
+      <tr>
+        <td>外殼防火</td>
+        <td>依材質不同，多數無阻燃認證<br>工業型可選不鏽鋼外殼</td>
+        <td>多數入門型為一般 ABS<br>工業型可選金屬外殼</td>
+        <td><span class="chip chip-a">UL94 V-0</span> 阻燃 ABS/PC<br>最高阻燃等級，防火優先設計</td>
+      </tr>
+      <tr>
+        <td>控制輸出類型</td>
+        <td>雙金屬型：機械接點（低電流）<br>玻璃管：無輸出</td>
+        <td>繼電器（通常 10A / AC250V）<br>部分支援 SSR 觸發輸出</td>
+        <td>SPDT 繼電器，NO / NC / COM<br>最大持續 2.5A（DC 0~30V）</td>
+      </tr>
+      <tr>
+        <td>設定方式</td>
+        <td>機械旋鈕（精度有限）<br>玻璃管：讀值，不可設定</td>
+        <td><span class="chip chip-g">數位按鍵</span>，設定值精確明確</td>
+        <td>機械旋鈕；說明書附角度刻度對照圖（1°C / 25°C / 41°C / 65°C 四點對照），依圖示轉動旋鈕即可設定；詳細接線見 <a href="https://drive.google.com/file/d/1I90y72y9HtPYs4UcWHQ4iX05-CS2VSnG/view?usp=sharing" target="_blank" style="color:var(--amber);font-weight:700;text-decoration:underline;">Wiring Diagram 接線圖 ↗</a></td>
+      </tr>
+      <tr>
+        <td>長期維護</td>
+        <td>彈簧、雙金屬片老化後精度下降<br>玻璃管極耐用，幾乎無老化</td>
+        <td>韌體停更可能影響功能<br>MCU 廠停產後零件難取得</td>
+        <td><span class="chip chip-g">純類比電路</span>，無韌體老化問題<br>電氣壽命 ≥ 50,000 次（每天切換 45 次可用 3 年以上）</td>
+      </tr>
+      <tr>
+        <td>適用輸入電源</td>
+        <td>不需電源（自驅動）</td>
+        <td>AC 或 DC（依型號廣泛支援）</td>
+        <td>僅 DC 12V（嚴禁接 AC）</td>
+      </tr>
+      <tr>
+        <td>最適場景</td>
+        <td>純溫度監測、顯示<br>低電流機械接點控制</td>
+        <td>精密溫控、顯示、遠端整合<br>AC 負載控制</td>
+        <td>長期無人值守工控輔助保護<br>高 EMI 環境、DC 負載</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="cmp-summary">
+    <div class="cmp-sum-card cmp-sum-mech">
+      <div class="csl-title">🌡️ 傳統機械型 · 最適場景</div>
+      <div class="csl-body">不需電力即可顯示溫度，在電力不穩或無電源的環境中不可取代。玻璃管溫度計作為校準參考或現場讀值工具極為可靠；雙金屬溫控適合低精度、低電流的機械接點控制。</div>
+    </div>
+    <div class="cmp-sum-card cmp-sum-digit">
+      <div class="csl-title">📟 數位 MCU 型 · 最適場景</div>
+      <div class="csl-body">精度需求高（±1°C 以下）、需要螢幕顯示、需要遠端監控整合、或負載為 AC 電源的場景，數位溫控器是最成熟的選擇，生態完整，型號選擇多。</div>
+    </div>
+    <div class="cmp-sum-card cmp-sum-tg">
+      <div class="csl-title">⚡ TempGuard · 最適場景</div>
+      <div class="csl-body">長期無人值守、需大幅降低軟體異常故障風險、高電磁干擾工控環境、DC 12V 現有電源、感測觸發電流僅 ≤40mA 對電源干擾極小、或作為數位溫控外的第二層硬體保護——類比架構在這些場景中提供更確定的行為保障。</div>
+    </div>
+  </div>
+
+  <div class="callout callout-amber">
+    <div class="callout-icon">💡</div>
+    <div>
+      <strong>綜合建議：</strong>三種技術不互斥，實務上可以組合使用。例如：玻璃管溫度計作為現場讀值工具 + TempGuard 作為硬體保護觸發 + 數位溫控作為精密監控顯示——各司其職，互為補充。
+    </div>
+  </div>
+</div>
+
+<!-- ╔═ SCENARIOS ═╗ -->
+<div class="sec" id="scenarios">
+  <div class="sec-eyebrow">◆ 核心詮釋 · 03</div>
+  <h2 class="sec-h2">三種控制模式，<em>一台覆蓋</em></h2>
+  <p class="sec-lead">TempGuard 以 SPDT 雙向接點設計，同一模組可因應三種完全不同的工控邏輯，不需購買不同型號。</p>
+
+  <div class="scene-grid" style="border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-m);">
+    <div class="scene-card scene-tg">
+      <div class="scene-icon">🌡️</div>
+      <div class="scene-mode">模式 A · COM + NO</div>
+      <div class="scene-title">高溫啟動散熱</div>
+      <div class="scene-body">
+        溫度超過設定值 → 繼電器導通 → 負載啟動<br>
+        溫度低於（設定值 − 回差）→ 繼電器斷開<br><br>
+        <strong>典型負載：</strong>散熱風扇、排氣扇、工業冷卻系統<br>
+        <strong>典型場景：</strong>工控機櫃、變頻器、電控箱散熱管理
+      </div>
+      <span class="scene-result" style="background:var(--amber-l);color:var(--amber-d);">超溫啟動 · NO 接線</span>
+    </div>
+    <div class="scene-card scene-tg" style="border-left:1px solid var(--border);">
+      <div class="scene-icon">🛑</div>
+      <div class="scene-mode">模式 B · COM + NC</div>
+      <div class="scene-title">高溫強制斷電</div>
+      <div class="scene-body">
+        正常溫度下電路導通（NC 閉合）<br>
+        溫度超過設定值 → 繼電器動作 → NC 斷開<br><br>
+        <strong>典型負載：</strong>設備電源控制線、訊號線<br>
+        <strong>典型場景：</strong>精密設備過熱保護、緊急停機保護電路
+      </div>
+      <span class="scene-result" style="background:var(--red-l);color:var(--red);">超溫斷路 · NC 接線</span>
+    </div>
+    <div class="scene-card scene-tg" style="border-left:1px solid var(--border);">
+      <div class="scene-icon">🔥</div>
+      <div class="scene-mode">模式 C · COM + NC</div>
+      <div class="scene-title">低溫自動加熱</div>
+      <div class="scene-body">
+        低於設定值時 NC 保持導通 → 加熱器運作<br>
+        達到設定值 + 回差後 → 繼電器動作 → NC 斷開<br><br>
+        <strong>典型負載：</strong>防結露加熱片、保溫燈、電熱帶<br>
+        <strong>典型場景：</strong>室外電控箱防結露、低溫環境設備保溫
+      </div>
+      <span class="scene-result" style="background:var(--teal-l);color:var(--teal-d);">低溫加熱 · NC 接線</span>
+    </div>
+  </div>
+
+  <div class="callout callout-teal" style="margin-top:20px;">
+    <div class="callout-icon">⚙️</div>
+    <div>
+      <strong>接線注意：</strong>模式 B（高溫斷電）與模式 C（低溫加熱）使用相同的 NC 接線方式，差異在於旋鈕設定溫度的高低與實際負載類型。隨附說明書內含旋鈕角度刻度對照圖（1°C / 25°C / 41°C / 65°C 四點溫度對照），使用者依圖示調整旋鈕角度即可完成基本設定，並搭配 2.5A 保險絲保護電路。詳細接線方式請參閱 <a href="https://drive.google.com/file/d/1I90y72y9HtPYs4UcWHQ4iX05-CS2VSnG/view?usp=sharing" target="_blank" style="color:var(--amber);font-weight:700;text-decoration:underline;">Wiring Diagram 接線圖 ↗</a>，圖示涵蓋散熱啟動、高溫斷電、低溫加熱三種應用接法。<br><br><strong>⚠️ 安裝建議：</strong>本品涉及直流電路配線，建議由具備基本電工知識之專業人員進行安裝。不確定接線方式者，歡迎來訊傳現場照片，我們提供免費評估建議。
+    </div>
+  </div>
+</div>
+
+<!-- ╔═ TECH SPECS ═╗ -->
+<div class="sec" id="specs">
+  <div class="sec-eyebrow">◆ 核心詮釋 · 04</div>
+  <h2 class="sec-h2">完整技術規格，<em>購前確認清單</em></h2>
+  <p class="sec-lead">所有數值均為實測或設計值，精度表現因環境溫度與安裝位置而異。</p>
+
+  <div class="specs-2col">
+    <div class="sr"><div class="sk">控制架構</div><div class="sv">純類比電路，FR4 PCB，<code>無 MCU</code>，無韌體</div></div>
+    <div class="sr"><div class="sk">感測元件</div><div class="sv">NTC 氣體溫度探頭；25°C ≈ 10 kΩ；線長 8cm</div></div>
+    <div class="sr"><div class="sk">控溫範圍</div><div class="sv"><code>1 ~ 65°C</code>（旋鈕連續可調）</div></div>
+    <div class="sr"><div class="sk">最佳工作區間</div><div class="sv">20 ~ 60°C（精度與回差最佳）</div></div>
+    <div class="sr"><div class="sk">控制精度</div><div class="sv">±2.6 ~ ±4.0°C<br><span style="font-size:11px;color:var(--muted);">中溫區 20~50°C 約 ±2.6°C（最佳）</span></div></div>
+    <div class="sr"><div class="sk">回差（遲滯）</div><div class="sv">5.2 ~ 8.0°C<br><span style="font-size:11px;color:var(--muted);">中溫區約 5.2°C；保護繼電器不頻繁切換</span></div></div>
+    <div class="sr"><div class="sk">輸入電源</div><div class="sv"><code>DC 12V</code>（<span class="warn">嚴禁接 AC</span>；嚴禁極性接反）</div></div>
+    <div class="sr"><div class="sk">感測觸發電流</div><div class="sv"><span class="good">≤ 40mA</span>（溫度感測與觸發電路整體）<br><span style="font-size:11px;color:var(--muted);">對電源線路干擾極小，適合低電流控制回路</span></div></div>
+    <div class="sr"><div class="sk">最大輸出電流</div><div class="sv">持續 <code>2.5A</code>（DC 0~30V）<br><span style="font-size:11px;color:var(--muted);">建議輸入端加裝 2.5A 保險絲</span></div></div>
+    <div class="sr"><div class="sk">繼電器型號</div><div class="sv">Songle SRD-12VDC-SL-C，額定 10A；降額至 2.5A 使用</div></div>
+    <div class="sr"><div class="sk">接點型態</div><div class="sv">SPDT（<code>NO</code> 常開 / <code>NC</code> 常閉 / <code>COM</code> 公共端）</div></div>
+    <div class="sr"><div class="sk">外殼材質</div><div class="sv">UL94 V-0 阻燃 ABS/PC；40 × 28 × 23 mm；孔距 48mm</div></div>
+    <div class="sr"><div class="sk">工作溫度</div><div class="sv">-10 ~ +60°C（超過 60°C 加速老化）</div></div>
+    <div class="sr"><div class="sk">工作濕度</div><div class="sv">RH 20 ~ 85%；無結露、無腐蝕氣體</div></div>
+    <div class="sr"><div class="sk">繼電器壽命</div><div class="sv">
+  電氣壽命設計值 ≥ <span class="good">50,000 次</span>；Songle 機械壽命達 1,000 萬次<br>
+  <span style="font-size:11px;color:var(--muted);">50,000 次為降額 2.5A 使用下的保守電氣估算，含安全餘裕</span><br>
+  <div style="margin-top:8px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:380px;">
+    <div style="background:#d6f0eb;border:1px solid #80d0c0;border-radius:6px;padding:7px 8px;text-align:center;">
+      <div style="font-size:11px;font-weight:700;color:#0d4a3e;">✅ 3 年使用</div>
+      <div style="font-size:10px;color:#177060;margin-top:2px;">每天切換 45 次<br>= 49,275 次</div>
+    </div>
+    <div style="background:#fdf0d6;border:1px solid #e0c080;border-radius:6px;padding:7px 8px;text-align:center;">
+      <div style="font-size:11px;font-weight:700;color:#7a4d06;">✅ 2 年使用</div>
+      <div style="font-size:10px;color:#c47d0e;margin-top:2px;">每天切換 68 次<br>= 49,640 次</div>
+    </div>
+    <div style="background:#dce8f7;border:1px solid #c0d0f0;border-radius:6px;padding:7px 8px;text-align:center;">
+      <div style="font-size:11px;font-weight:700;color:#1e3555;">✅ 1 年使用</div>
+      <div style="font-size:10px;color:#3a5a8a;margin-top:2px;">每天切換 136 次<br>= 49,640 次</div>
+    </div>
+  </div>
+</div></div>
+    <div class="sr"><div class="sk">設計產地</div><div class="sv">台灣設計・組裝</div></div>
+    <div class="sr"><div class="sk">開源授權</div><div class="sv">CERN-OHL-S v2.0（硬體）/ CC BY-SA 4.0（文件）</div></div>
+  
+  <!-- Wiring Diagram -->
+  <div style="margin-top:24px;background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-m);">
+    <div style="background:var(--teal-l);border-bottom:2px solid var(--teal);padding:16px 22px;display:flex;align-items:center;gap:12px;">
+      <div style="font-size:22px;">📐</div>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:var(--teal-d);">Wiring Diagram — 接線圖說明</div>
+        <div style="font-size:11px;color:var(--teal);font-family:'IBM Plex Mono',monospace;margin-top:2px;">詳細接線圖示，安裝前請先參閱</div>
+      </div>
+    </div>
+    <div style="padding:20px 22px;">
+      <p style="font-size:13px;color:var(--muted);line-height:1.85;margin-bottom:16px;">
+        接線圖涵蓋旋鈕刻度四點溫度對照（1°C / 25°C / 41°C / 65°C），
+        以及散熱啟動、高溫斷電、低溫加熱三種應用接線方式。
+        安裝前請先參閱，確認接線後再進行配線作業。
+      </p>
+
+      <!-- Wiring Diagram 獨立大框架 -->
+      <div style="margin-bottom:24px;">
+        <!-- 大圖展示 -->
+        <div style="
+          border-radius:12px;overflow:hidden;
+          border:2px solid var(--teal);
+          background:var(--bg2);
+          box-shadow:var(--shadow-m);
+          cursor:pointer;
+        " onclick="toggleWiring()" title="點擊放大 / 縮小">
+          <div style="background:var(--teal);padding:10px 18px;display:flex;align-items:center;justify-content:space-between;">
+            <span style="color:#fff;font-size:13px;font-weight:700;">📐 Wiring Diagram — 接線圖</span>
+            <span style="color:rgba(255,255,255,0.7);font-size:11px;font-family:'IBM Plex Mono',monospace;" id="wiringToggleHint">點擊放大查看 ↕</span>
+          </div>
+          <div id="wiringImgWrap" style="overflow:hidden;transition:max-height 0.4s ease;max-height:320px;">
+            <img src="https://raw.githubusercontent.com/WarnerCharon/TempGuard---Analog-DC-Temperature-Control-Module/refs/heads/main/Images/Wiring%20Diagram.png"
+                 alt="TempGuard Wiring Diagram 接線圖"
+                 id="wiringImg"
+                 style="width:100%;display:block;object-fit:contain;transition:all 0.3s;"
+                 onerror="this.style.display='none';document.getElementById('wiringFallback').style.display='block'">
+            <div id="wiringFallback" style="display:none;padding:32px;text-align:center;color:var(--muted);font-size:13px;">
+              圖片載入中⋯ 或
+              <a href="https://drive.google.com/file/d/1I90y72y9HtPYs4UcWHQ4iX05-CS2VSnG/view?usp=sharing" target="_blank" style="color:var(--teal);font-weight:700;">點此查看雲端版本 ↗</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align:center;">
+        <a href="https://drive.google.com/file/d/1I90y72y9HtPYs4UcWHQ4iX05-CS2VSnG/view?usp=sharing" target="_blank"
+           style="display:inline-block;background:var(--teal);color:#fff;padding:11px 28px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;font-family:'Noto Sans TC',sans-serif;">
+          📐 查看完整 Wiring Diagram 接線圖（雲端版）↗
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ╔═ SAFETY ═╗ -->
+<div class="sec" id="safety">
+  <div class="sec-eyebrow">◆ 核心詮釋 · 05</div>
+  <h2 class="sec-h2">安全說明，<em>六點全讀</em></h2>
+  <div style="background:var(--red-l);border:2px solid var(--red);border-radius:12px;padding:18px 22px;margin-bottom:24px;display:flex;gap:14px;align-items:flex-start;">
+    <div style="font-size:26px;flex-shrink:0;">⚠️</div>
+    <div>
+      <div style="font-size:15px;font-weight:700;color:var(--red);margin-bottom:6px;">本品涉及直流電路接線，建議由具備基本電工知識之專業人員進行安裝與配線。</div>
+      <div style="font-size:13px;color:#7a3030;line-height:1.8;">非專業人員自行操作可能導致短路、設備損壞或人身安全風險。如不確定接線方式，請勿貿然操作——歡迎來訊傳現場照片，我們提供免費接線評估與安裝建議。</div>
+    </div>
+  </div>
+  <p class="sec-lead">以下為安裝過程中最關鍵的六項安全事項，每一條都有其對應的真實風險。</p>
+
+  <div class="safety-grid">
+    <div class="scard scard-r">
+      <div class="si">⚡</div>
+      <div class="st">僅限 DC 12V 輸入</div>
+      <div class="sb">嚴禁接 AC 110V 或 220V。接交流電將立即損壞模組，且不在保固範圍。接線前請以萬用表確認電源型態與電壓。</div>
+    </div>
+    <div class="scard scard-r">
+      <div class="si">🔌</div>
+      <div class="st">極性不可接反</div>
+      <div class="sb">DC 12V 正負極接反將立即損壞模組，不在保固範圍。接線時紅線接正極、黑線接負極，請再次確認後才接通電源。</div>
+    </div>
+    <div class="scard scard-r">
+      <div class="si">🔢</div>
+      <div class="st">最大電流 2.5A（DC）</div>
+      <div class="sb">超過 2.5A 的負載必須外加 SSR 或中繼繼電器，不得直接驅動超規負載。建議輸入端加裝 2.5A 自復保險絲。</div>
+    </div>
+    <div class="scard scard-a">
+      <div class="si">🛡️</div>
+      <div class="st">禁止裸板運行</div>
+      <div class="sb">本品僅販售含 UL94 V-0 阻燃外殼版本。任何情況下不得拆除外殼後繼續運行，防火外殼是安全設計的一部分，非選配。</div>
+    </div>
+    <div class="scard scard-g">
+      <div class="si">🔧</div>
+      <div class="st">接線前務必斷電</div>
+      <div class="sb">所有接線與維護作業，務必由具備電工基礎知識的人員操作。斷開所有電源，以萬用表確認無殘壓後再進行。避免短路或觸電風險。</div>
+    </div>
+    <div class="scard scard-g">
+      <div class="si">⚙️</div>
+      <div class="st">工控輔助定位</div>
+      <div class="sb">本品為工控系統的輔助溫控模組，需配合主系統架構使用，不得作為安全保護的唯一裝置。明確定位，才能正確使用。</div>
+    </div>
+    <div class="scard scard-a">
+      <div class="si">📄</div>
+      <div class="st">安裝前請先閱讀說明書</div>
+      <div class="sb">接線前務必詳閱隨附說明書，內含接線圖示、旋鈕刻度對照、注意事項等完整說明。<br>→ <a href="https://drive.google.com/file/d/1I90y72y9HtPYs4UcWHQ4iX05-CS2VSnG/view?usp=sharing" target="_blank" style="color:var(--amber-d);font-weight:700;text-decoration:underline;">Wiring Diagram 接線圖 ↗</a><br><a href="https://drive.google.com/file/d/1I90y72y9HtPYs4UcWHQ4iX05-CS2VSnG/view?usp=sharing" target="_blank" style="color:var(--amber-d);font-weight:700;text-decoration:underline;">Wiring Diagram 接線圖 ↗</a></div>
+    </div>
+    <div class="scard scard-a">
+      <div class="si">🔋</div>
+      <div class="st">電源品質要求</div>
+      <div class="sb">建議使用具穩壓功能的 DC 12V 電源供應器，避免使用劣質變壓器或與大電流負載共用同一電源線，以防電壓波動影響感測精度或損壞元件。</div>
+    </div>
+    <div class="scard scard-r">
+      <div class="si">🚫</div>
+      <div class="st">禁用環境</div>
+      <div class="sb">請勿於以下環境使用：腐蝕性氣體或化學溶劑環境、水氣凝結（結露）環境、劇烈振動或撞擊環境。上述環境將加速元件老化或造成異常，不在保固範圍。</div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔═ INBOX ═╗ -->
+<div class="sec" id="inbox">
+  <div class="sec-eyebrow">◆ 核心詮釋 · 06</div>
+  <h2 class="sec-h2">開箱清單 · 保固，<em>收到先對照</em></h2>
+  <div class="callout callout-amber" style="margin-bottom:28px;">
+    <div class="callout-icon">📹</div>
+    <div>
+      <strong>建議開箱前先錄影存證</strong><br>
+      <span style="font-size:13px;">收到商品後，建議在拆封前以連續方式錄影記錄外包裝狀態與開箱過程，作為雙方日後若有爭議時的客觀依據，保障您的收貨權益。</span><br>
+      <span style="font-size:12px;margin-top:6px;display:block;color:var(--amber-d);">📌 本店出貨前均已拍照記錄商品序號、外觀與配件完整狀態，作為出貨憑證存檔。</span>
+    </div>
+  </div>
+
+  <ul class="inbox-list" style="margin-bottom:32px;">
+    <li class="inbox-li">
+      <div class="inbox-num">1</div>
+      <div><div class="inbox-name">TempGuard 模組（含 UL94 V-0 防火外殼）× 1</div><div class="inbox-note">確認：外觀無裂痕 · 螺絲齊全 · 面蓋背蓋完整 · 旋鈕可轉動</div></div>
+    </li>
+    <li class="inbox-li">
+      <div class="inbox-num">2</div>
+      <div><div class="inbox-name">NTC 氣體溫度探頭 × 1</div><div class="inbox-note">確認：電纜完整無損 · 25°C 阻值應 ≈ 10 kΩ（可用萬用表量測）</div></div>
+    </li>
+    <li class="inbox-li">
+      <div class="inbox-num">3</div>
+      <div><div class="inbox-name">固定螺絲組 + 模組背蓋雙面膠 × 1 組</div><div class="inbox-note">確認：螺絲數量齊全 · 雙面膠完整未撕開</div></div>
+    </li>
+    <li class="inbox-li">
+      <div class="inbox-num">4</div>
+      <div><div class="inbox-name">外殼 QR Code 序號貼紙 × 1 組</div><div class="inbox-note">保固申請須提供：序號 + 購買憑證 + 安裝現場實際照片，請妥善保存，勿撕毀</div></div>
+    </li>
+    <li class="inbox-li">
+      <div class="inbox-num" style="background:var(--muted);">+</div>
+      <div><div class="inbox-name">感測線延長線（選購，可訂製長度）</div><div class="inbox-note">如需延長探頭至更遠位置，請來訊說明所需長度後加購訂製</div></div>
+    </li>
+  </ul>
+
+  <div class="warr-row">
+    <div class="wcard">
+      <div class="wcard-icon">📅</div>
+      <div class="wcard-title">6 個月保固</div>
+      <div class="wcard-desc">自購買日起計算<br>可加購延長</div>
+    </div>
+    <div class="wcard">
+      <div class="wcard-icon">🔧</div>
+      <div class="wcard-title">免費維修 / 換新</div>
+      <div class="wcard-desc">非人為損壞之<br>自然元件失效</div>
+    </div>
+    <div class="wcard">
+      <div class="wcard-icon">🧾</div>
+      <div class="wcard-title">申請方式</div>
+      <div class="wcard-desc">序號貼紙 + 購買憑證<br>+ 安裝現場實際照片</div>
+    </div>
+    <div class="wcard wcard-r">
+      <div class="wcard-icon">❌</div>
+      <div class="wcard-title">保固除外</div>
+      <div class="wcard-desc">接 AC · 超電流<br>極性接反 · 人為改裝</div>
+    </div>
+  </div>
+
+  <!-- 配套選購服務 -->
+  <div style="margin-top:32px;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--teal);background:var(--teal-l);padding:4px 12px;border-radius:4px;display:inline-block;margin-bottom:16px;font-weight:600;">🔧 配套選購服務</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">以下配件與服務可依實際安裝需求加購，歡迎來訊說明環境後報價。</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 16px;box-shadow:var(--shadow-s);">
+        <div style="font-size:22px;margin-bottom:8px;">🔌</div>
+        <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;">線路延長服務</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.7;">依現場配線需求訂製接線長度，減少現場佈線工程</div>
+      </div>
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 16px;box-shadow:var(--shadow-s);">
+        <div style="font-size:22px;margin-bottom:8px;">🌡️</div>
+        <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;">NTC 感測線延長線</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.7;">將感測探頭延伸至最佳量測位置，可訂製所需長度</div>
+      </div>
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 16px;box-shadow:var(--shadow-s);">
+        <div style="font-size:22px;margin-bottom:8px;">🔩</div>
+        <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;">線頭端子壓接服務</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.7;">預壓端子接線，免工具即可插拔，安裝更快速確實</div>
+      </div>
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 16px;box-shadow:var(--shadow-s);">
+        <div style="font-size:22px;margin-bottom:8px;">🛡️</div>
+        <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;">保險絲（2.5A）</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.7;">建議搭配使用，保護輸入電路，防止短路過載損壞</div>
+      </div>
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 16px;box-shadow:var(--shadow-s);">
+        <div style="font-size:22px;margin-bottom:8px;">⚡</div>
+        <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;">SSR 固態繼電器</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.7;">負載超過 2.5A 或需 AC 負載控制時搭配使用；無機械磨損、切換壽命長，適合高頻次啟停場景</div>
+      </div>
+      <div style="background:var(--amber-l);border:1px solid var(--amber);border-radius:10px;padding:18px 16px;box-shadow:var(--shadow-s);">
+        <div style="font-size:22px;margin-bottom:8px;">🎛️</div>
+        <div style="font-size:13px;font-weight:700;color:var(--amber-d);margin-bottom:6px;">🎛️ 客製化溫度區段</div>
+        <div style="font-size:12px;color:var(--amber-d);line-height:1.85;">
+          標準控溫範圍為 <strong>1~65°C</strong>。若您有特定應用場景，例如：<br>
+          · 僅需 <strong>25~45°C</strong> 精準段（室內設備保護）<br>
+          · 或 <strong>50~65°C</strong> 高溫段（工業散熱觸發）<br><br>
+          可來訊說明需求，我方提供<strong>客製化電路參數調整報價</strong>。<br>
+          訂製工時約 <strong>7~10 個工作天</strong>。
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔═ LEGAL NOTICE ═╗ -->
+
+<!-- ╔═ FAQ ═╗ -->
+<div class="sec" id="faq">
+  <div class="sec-eyebrow">◆ 常見問題</div>
+  <h2 class="sec-h2">買前必看，<em>常見問題解答</em></h2>
+  <p class="sec-lead">以下為購買前最常詢問的問題，如有其他疑問歡迎來訊。</p>
+
+  <div style="display:grid;gap:12px;">
+
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-s);">
+      <div style="background:var(--amber-l);padding:13px 20px;font-size:14px;font-weight:700;color:var(--amber-d);">Q1｜這個可以控制 AC（交流）負載嗎？</div>
+      <div style="padding:14px 20px;font-size:13px;color:var(--muted);line-height:1.8;">❌ 不行。本品輸出端僅支援 DC 0~30V、最大 2.5A 直流負載。如需控制 AC 設備（如 AC 風扇、加熱器），需另外搭配 SSR 固態繼電器，可來訊詢問配套方案。</div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-s);">
+      <div style="background:var(--amber-l);padding:13px 20px;font-size:14px;font-weight:700;color:var(--amber-d);">Q2｜NTC 感測線可以延長多長？</div>
+      <div style="padding:14px 20px;font-size:13px;color:var(--muted);line-height:1.8;">✅ 可依需求加購訂製延長線，一般環境建議延長不超過 5 公尺，以避免線路電阻影響感測精度。請來訊說明所需長度與使用場景，我們提供適合的方案。</div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-s);">
+      <div style="background:var(--amber-l);padding:13px 20px;font-size:14px;font-weight:700;color:var(--amber-d);">Q3｜可以同時控制兩個負載嗎？</div>
+      <div style="padding:14px 20px;font-size:13px;color:var(--muted);line-height:1.8;">⚠️ 單模組僅有一組 SPDT 繼電器輸出，若需控制兩個獨立負載（如同時驅動風扇與指示燈），需使用兩個模組，或在繼電器輸出後再接分路。請注意總電流不得超過 2.5A。</div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-s);">
+      <div style="background:var(--amber-l);padding:13px 20px;font-size:14px;font-weight:700;color:var(--amber-d);">Q4｜旋鈕要怎麼設定到我要的溫度？</div>
+      <div style="padding:14px 20px;font-size:13px;color:var(--muted);line-height:1.8;">✅ 隨附說明書內含旋鈕角度刻度對照圖，標示 1°C / 25°C / 41°C / 65°C 四個溫度對照點，依圖示轉動旋鈕至對應角度即可完成基本設定。如需更精確的觸發溫度，可搭配外部溫度計輔助微調。接線圖示請參閱 <a href="https://drive.google.com/file/d/1I90y72y9HtPYs4UcWHQ4iX05-CS2VSnG/view?usp=sharing" target="_blank" style="color:var(--amber);font-weight:700;text-decoration:underline;">Wiring Diagram 接線圖 ↗</a>。<br></div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-s);">
+      <div style="background:var(--amber-l);padding:13px 20px;font-size:14px;font-weight:700;color:var(--amber-d);">Q5｜我需要客製化特定溫度範圍，流程是什麼？</div>
+      <div style="padding:14px 20px;font-size:13px;color:var(--muted);line-height:1.8;">✅ 請來訊說明您的應用場景與所需溫度區段，我方評估後提供報價。確認後以 LINE 訊息或 Email 文字留存為合意憑證。付款後進入製作，工時 7~10 個工作天（不含例假日），完成校驗確認後通知出貨。</div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-s);">
+      <div style="background:var(--amber-l);padding:13px 20px;font-size:14px;font-weight:700;color:var(--amber-d);">Q6｜我不確定接線方式，可以請你們協助嗎？</div>
+      <div style="padding:14px 20px;font-size:13px;color:var(--muted);line-height:1.8;">✅ 可以。請來訊傳現場照片或說明您的電路配置，我們提供免費接線評估與安裝建議。也可先下載說明書確認接線圖示。</div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-s);">
+      <div style="background:var(--amber-l);padding:13px 20px;font-size:14px;font-weight:700;color:var(--amber-d);">Q7｜如何確認我收到的是正品？</div>
+      <div style="padding:14px 20px;font-size:13px;color:var(--muted);line-height:1.8;">✅ 正品外殼上附有 QR Code 序號貼紙，為正品憑證。本店為唯一授權銷售管道，市面上若出現相似外觀商品，請確認賣家身份。如有疑問可來訊查詢序號。</div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ╔═ VIDEO ═╗ -->
+<div class="sec" id="video">
+  <div class="sec-eyebrow">◆ 實測影片</div>
+  <h2 class="sec-h2">環境實測，<em>看實際運作</em></h2>
+  <p class="sec-lead">以下為 TempGuard 於環境溫度變化下的實際觸發測試紀錄，可直接觀察模組的感測與繼電器動作過程。</p>
+
+  <div class="video-wrap">
+    <div class="video-hdr">
+      <div class="video-hdr-icon">▶️</div>
+      <div>
+        <div class="video-hdr-title">TempGuard DC — Ambient Temperature Test</div>
+        <div class="video-hdr-sub">環境溫度感測實測 · 繼電器觸發示範</div>
+      </div>
+    </div>
+    <div class="video-embed">
+      <iframe
+        width="560"
+        height="315"
+        src="https://www.youtube-nocookie.com/embed/hlYrzFpF8Ec?si=7F3l39wAZfd4lNMn&amp;start=5"
+        title="YouTube video player"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen>
+      </iframe>
+    </div>
+    <div class="video-note">
+      📌 影片內容說明：模組於不同環境溫度條件下的感測反應與繼電器切換過程。實測以 NTC 氣體溫度探頭進行環境溫度量測，旋鈕設定至特定觸發點，觀察繼電器動作時序與回差特性。
+      <br><br>
+      <a href="https://youtu.be/hlYrzFpF8Ec" target="_blank"
+         style="color:var(--red);font-weight:700;font-size:12px;">▶ 前往 YouTube 觀看完整影片 ↗</a>
+    </div>
+  </div>
+</div>
+
+<div class="sec" id="legal">
+  <div class="sec-eyebrow">◆ 購買前重要告知</div>
+  <h2 class="sec-h2">退換貨政策，<em>下單前請詳閱</em></h2>
+  <p class="sec-lead">以下說明依據現行消費者保護法規，旨在確保交易透明、保障雙方權益。如有任何疑問，歡迎下單前來訊詢問。</p>
+
+  <!-- 法源依據 callout -->
+  <div class="callout callout-amber" style="margin-bottom:24px;">
+    <div class="callout-icon">⚖️</div>
+    <div>
+      <strong>法律依據：</strong>消費者保護法第 19 條但書 ＋《通訊交易解除權合理例外情事適用準則》第 2 條<br>
+      <span style="font-size:13px;color:var(--amber-d);">工控電子配件屬「性質特殊商品」，廠商已於銷售頁顯著位置告知，消費者下單視為同意豁免七天鑑賞期。</span>
+    </div>
+  </div>
+
+  <!-- 四張告知卡片 -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:28px;">
+
+    <div style="background:var(--white);border:1px solid var(--border);border-top:3px solid var(--red);border-radius:12px;padding:22px 20px;box-shadow:var(--shadow-s);">
+      <div style="font-size:24px;margin-bottom:10px;">🔧</div>
+      <div style="font-size:14px;font-weight:700;color:var(--red);margin-bottom:8px;">拆封或接線後</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.8;">工控電子配件的「拆封」與一般商品不同——拆封後若接線或調試旋鈕，會在電路板上留下接觸痕跡與參數調試記錄，商品即無法恢復「全新未使用」狀態。此時廠商無法客觀判斷商品是否曾受人為損壞，也難以進行二次銷售，因此屬於合理的拒退情形。</div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-top:3px solid var(--red);border-radius:12px;padding:22px 20px;box-shadow:var(--shadow-s);">
+      <div style="font-size:24px;margin-bottom:10px;">📦</div>
+      <div style="font-size:14px;font-weight:700;color:var(--red);margin-bottom:8px;">包裝損毀或配件缺失</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.8;">即使僅拆封未接線，若外包裝損毀或配件缺失，廠商得以「影響二次銷售」為由主張拒退，此屬消費者超出合理檢驗範圍。</div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-top:3px solid var(--amber);border-radius:12px;padding:22px 20px;box-shadow:var(--shadow-s);">
+      <div style="font-size:24px;margin-bottom:10px;">🎛️</div>
+      <div style="font-size:14px;font-weight:700;color:var(--amber-d);margin-bottom:8px;">客製化訂製品</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.8;">溫度區段客製、線材訂製等，以 LINE 訊息或 Email 文字確認為準——雙方確認截圖即為合意憑證。一經確認製作即不適用七天鑑賞期，建議下單前充分溝通確認需求後再進行。</div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-top:3px solid var(--teal);border-radius:12px;padding:22px 20px;box-shadow:var(--shadow-s);">
+      <div style="font-size:24px;margin-bottom:10px;">✅</div>
+      <div style="font-size:14px;font-weight:700;color:var(--teal);margin-bottom:8px;">製造瑕疵保固正常適用</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.8;">商品本身之製造瑕疵，仍依六個月保固條款正常處理。請於收貨 48 小時內附現場照片來訊，我們積極協助處理。</div>
+    </div>
+
+
+    <div style="background:var(--white);border:1px solid var(--border);border-top:3px solid var(--slate);border-radius:12px;padding:22px 20px;box-shadow:var(--shadow-s);">
+      <div style="font-size:24px;margin-bottom:10px;">📹</div>
+      <div style="font-size:14px;font-weight:700;color:var(--slate-d);margin-bottom:8px;">瑕疵舉證責任</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.8;">主張商品瑕疵者，需提供開箱錄影或完整照片作為初步客觀依據，方可啟動保固流程。本店出貨前均有拍照存檔，雙方各有憑證，確保爭議可被客觀釐清。</div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-top:3px solid var(--slate);border-radius:12px;padding:22px 20px;box-shadow:var(--shadow-s);">
+      <div style="font-size:24px;margin-bottom:10px;">🚚</div>
+      <div style="font-size:14px;font-weight:700;color:var(--slate-d);margin-bottom:8px;">物流追蹤憑證</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.8;">本店所有訂單均使用具追蹤號碼之物流寄送，簽收記錄為收貨憑證。如遇物流損壞，請於簽收時當場拒收或在快遞人員在場時拍照記錄。</div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-top:3px solid var(--slate);border-radius:12px;padding:22px 20px;box-shadow:var(--shadow-s);">
+      <div style="font-size:24px;margin-bottom:10px;">👷</div>
+      <div style="font-size:14px;font-weight:700;color:var(--slate-d);margin-bottom:8px;">適用對象聲明</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.8;">本品適用對象為具備基本電工知識之專業人員或工控從業者，非一般家用消費品。此特性亦為本品符合「性質特殊商品」豁免鑑賞期之依據之一。</div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-top:3px solid var(--slate);border-radius:12px;padding:22px 20px;box-shadow:var(--shadow-s);">
+      <div style="font-size:24px;margin-bottom:10px;">🛡️</div>
+      <div style="font-size:14px;font-weight:700;color:var(--slate-d);margin-bottom:8px;">異常交易處理</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.8;">若發現明顯與事實不符之退貨申請，本店保留向平台申訴及依相關法規處理之權利。我們重視每一筆交易，也希望以誠信為基礎建立長期合作關係。</div>
+    </div>
+
+  </div>
+
+  <!-- 溫馨建議 callout -->
+  <div class="callout callout-teal">
+    <div class="callout-icon">💬</div>
+    <div>
+      <strong>下單前有疑問？歡迎先來訊詢問。</strong><br>
+      確認商品符合您的需求後再下單，是保護雙方最好的方式。我們認真回答每一個技術與選購問題。<br>
+      <span style="font-size:12px;margin-top:6px;display:block;">LINE：lin.ee/17faMX5　｜　E-mail：secret0806@duck.com</span>
+    </div>
+  </div>
+
+  <div class="callout callout-slate" style="margin-top:16px;">
+    <div class="callout-icon">©️</div>
+    <div>
+      <strong>文案與設計版權聲明</strong><br>
+      <span style="font-size:13px;">本頁所有文案、規格說明、設計編排均為原創內容，受著作權法保護。未經授權不得複製、轉載或仿冒使用於商業目的。</span>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:20px;">
+
+    <div style="background:var(--teal-l);border:1px solid var(--teal);border-radius:12px;padding:20px 18px;">
+      <div style="font-size:20px;margin-bottom:8px;">🎁</div>
+      <div style="font-size:14px;font-weight:700;color:var(--teal-d);margin-bottom:6px;">首次購買說明</div>
+      <div style="font-size:12px;color:var(--teal-d);line-height:1.85;">
+        首次購買標準款，附贈 <strong>2.5A 自復保險絲 × 1 組</strong>。<br><br>
+        歡迎來訊詢問，確認商品符合需求後再下單，是保護雙方最好的方式。
+      </div>
+    </div>
+
+    <div style="background:var(--slate-l);border:1px solid var(--slate);border-radius:12px;padding:20px 18px;">
+      <div style="font-size:20px;margin-bottom:8px;">📋</div>
+      <div style="font-size:14px;font-weight:700;color:var(--slate-d);margin-bottom:6px;">客製化下單流程</div>
+      <div style="font-size:12px;color:var(--slate-d);line-height:2.1;">
+        ① 來訊說明應用場景與所需溫度範圍<br>
+        ② 我方評估後提供報價，雙方以 LINE 訊息或 Email 文字確認留存<br>
+        ③ 付款後正式進入製作排程<br>
+        ④ 製作完成後進行功能校驗，確認觸發溫度符合需求<br>
+        ⑤ 校驗通過後通知出貨<br>
+        <span style="color:var(--muted);font-size:11px;">
+          ＊製作工時約 7~10 個工作天<br>
+          ＊工作天不含例假日及國定假日<br>
+          ＊實際工時依製作排程與需求複雜度可能略有調整，<br>
+          　屆時將主動告知
+        </span>
+      </div>
+    </div>
+
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px 18px;">
+      <div style="font-size:20px;margin-bottom:8px;">📜</div>
+      <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px;">交易聲明</div>
+      <div style="font-size:12px;color:var(--muted);line-height:2.0;">
+        · 本頁規格與售價如有異動，以下單當日頁面顯示為準。<br>
+        · 本店保留對有不良交易紀錄之買家拒絕出貨的權利。
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+</div><!-- /wrap -->
+
+<!-- ╔═ FINAL CTA ═╗ -->
+<div class="final-cta" id="buy">
+  <h2>
+    溫控，是對設備<br>
+    <em>最長情的承諾</em>
+  </h2>
+  <p class="sub">台灣設計製造 · 現貨供應中 · 6 個月保固<br>有任何技術疑問，下單前先問，我們認真回答每一個問題。</p>
+  <div class="cta-row">
+    <a class="btn-line-cta" href="https://lin.ee/17faMX5" target="_blank" style="font-size:16px;padding:16px 40px;">💬 LINE 官方購買 / 詢問</a>
+  </div>
+  <div class="final-contact">
+    E-mail：secret0806@duck.com　·　LINE：lin.ee/17faMX5　·　台灣設計製造
+  </div>
+</div>
+
+<div style="text-align:center;padding:20px 28px;font-size:11px;color:var(--muted);background:var(--bg2);font-family:'IBM Plex Mono',monospace;">
+  TempGuard v1.0 · © 2026 蔡安翔 · CERN-OHL-S v2.0 / CC BY-SA 4.0 · 台灣設計製造 · 保留一切修訂權利
+</div>
+
+
+<script>
+var wiringExpanded = false;
+function toggleWiring() {
+  var wrap = document.getElementById('wiringImgWrap');
+  var hint = document.getElementById('wiringToggleHint');
+  wiringExpanded = !wiringExpanded;
+  if (wiringExpanded) {
+    wrap.style.maxHeight = '1200px';
+    hint.textContent = '點擊縮小 ↕';
+  } else {
+    wrap.style.maxHeight = '320px';
+    hint.textContent = '點擊放大查看 ↕';
+  }
+}
+</script>
+
+</body>
+</html>
